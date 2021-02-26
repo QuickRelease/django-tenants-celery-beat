@@ -26,7 +26,10 @@ setup(
         "Operating System :: OS Independent",
     ],
     keywords="django tenants celery beat multitenancy postgres postgresql",
-    packages=find_packages(),
+    packages=[
+        "django_tenants_celery_beat",
+        "django_tenants_celery_beat.migrations",
+    ],
     install_requires=[
         "Django>=2.0",
         "django-tenants>=3.0.0",
