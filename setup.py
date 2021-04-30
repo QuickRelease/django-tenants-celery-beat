@@ -1,11 +1,11 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
     name="django-tenants-celery-beat",
-    version="0.1.0",
+    version="0.1.1",
     author="David Vaughan",
     author_email="david.vaughan@quickrelease.co.uk",
     maintainer="Quick Release (Automotive) Ltd.",
