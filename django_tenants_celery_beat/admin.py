@@ -17,7 +17,7 @@ class PeriodicTaskTenantLinkInline(admin.StackedInline):
         if obj is None:
             # Only for adding a new PeriodicTask
             formset.form.base_fields["tenant"].initial = request.tenant
-            if request.tenant.schema_name != get_public_schema_name():
+            if not is_public(request):
                 # Hide all other Tenants
                 # Need to make the field non-readonly as otherwise the default value
                 # is blank, and the PeriodicTask will be created with no Tenant, which
@@ -28,7 +28,7 @@ class PeriodicTaskTenantLinkInline(admin.StackedInline):
         return formset
 
     def get_readonly_fields(self, request, obj=None):
-        if request.tenant.schema_name == get_public_schema_name():
+        if is_public(request):
             return tuple()
         if obj is None:
             # For new PeriodicTasks, we need to set the Tenant
@@ -61,7 +61,7 @@ class TenantPeriodicTaskAdmin(PeriodicTaskAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.tenant.schema_name != get_public_schema_name():
+        if not is_public(request):
             qs = qs.filter(periodic_task_tenant_link__tenant=request.tenant)
         return qs.annotate(
             tenant=F("periodic_task_tenant_link__tenant__name")
@@ -70,3 +70,7 @@ class TenantPeriodicTaskAdmin(PeriodicTaskAdmin):
 
 admin.site.unregister(PeriodicTask)
 admin.site.register(PeriodicTask, TenantPeriodicTaskAdmin)
+
+
+def is_public(request):
+    return request.tenant.schema_name == get_public_schema_name()
