@@ -70,6 +70,8 @@ PERIODIC_TASK_TENANT_LINK_MODEL = "tenancy.PeriodicTaskTenantLink"
 
 TENANT_TIMEZONE_DISPLAY_GMT_OFFSET = False
 
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
 ALLOWED_HOSTS = ["*"]
 
 CACHES = {
