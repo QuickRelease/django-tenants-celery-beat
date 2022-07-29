@@ -194,3 +194,15 @@ this package that connects a `PeriodicTask` to a `Tenant`. You can toggle the
 will always take precedence). The tenant is shown as a read-only field, unless you are
 on the public admin site, in which case you have the option edit the tenant. Editing the
 tenant here will take precedence over the `beat_schedule`.
+
+## Developer Setup
+
+To set up the example app:
+1. Navigate into the `example` directory
+2. Create a virtual environment and install the requirements in `requirements.txt`
+3. Create a postgres database according to the `example.settings.DATABASES["default"]` (edit the settings if necessary)
+4. Run `python manage.py migrate_schemas` to create the public schema
+5. Run `python manage.py create_tenant` to create the public tenant and any other tenants
+6. Create superusers with `python manage.py create_tenant_superuser`
+7. Run `celery -A example beat --loglevel=INFO` to run the beat scheduler
+8. Run `celery -A example worker --loglevel=INFO` (add `--pool=solo` if on Windows)
