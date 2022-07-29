@@ -66,6 +66,8 @@ TENANT_MODEL = "tenancy.Tenant"
 
 TENANT_DOMAIN_MODEL = "tenancy.Domain"
 
+PERIODIC_TASK_TENANT_LINK_MODEL = "tenancy.PeriodicTaskTenantLink"
+
 TENANT_TIMEZONE_DISPLAY_GMT_OFFSET = False
 
 ALLOWED_HOSTS = ["*"]
@@ -123,7 +125,7 @@ DATABASES = {
         "HOST": "localhost",
         "PORT": "5432",
         "USER": "postgres",
-        "PASSWORD": "a",
+        "PASSWORD": "postgres",
     },
 }
 

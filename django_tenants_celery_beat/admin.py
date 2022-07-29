@@ -4,12 +4,11 @@ from django.db.models import F
 from django_celery_beat.admin import PeriodicTaskAdmin
 from django_celery_beat.models import PeriodicTask
 from django_tenants.utils import get_tenant_model, get_public_schema_name
-
-from django_tenants_celery_beat.models import PeriodicTaskTenantLink
+from django_tenants_celery_beat.utils import get_periodic_task_tenant_link_model
 
 
 class PeriodicTaskTenantLinkInline(admin.StackedInline):
-    model = PeriodicTaskTenantLink
+    model = get_periodic_task_tenant_link_model()
     can_delete = False
 
     def get_formset(self, request, obj=None, **kwargs):

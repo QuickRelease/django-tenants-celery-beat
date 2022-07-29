@@ -7,6 +7,7 @@ import timezone_field
 
 from django.conf import settings
 from django_tenants.utils import get_tenant_model, get_public_schema_name
+from django_tenants_celery_beat.utils import get_periodic_task_tenant_link_model
 
 
 class TenantTimezoneMixin(models.Model):
@@ -21,7 +22,7 @@ class TenantTimezoneMixin(models.Model):
         abstract = True
 
 
-class PeriodicTaskTenantLink(models.Model):
+class PeriodicTaskTenantLinkMixin(models.Model):
     tenant = models.ForeignKey(
         settings.TENANT_MODEL,
         on_delete=models.CASCADE,
@@ -33,6 +34,9 @@ class PeriodicTaskTenantLink(models.Model):
         related_name="periodic_task_tenant_link",
     )
     use_tenant_timezone = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return f"{self.tenant} - {self.periodic_task}"
@@ -68,35 +72,35 @@ class PeriodicTaskTenantLink(models.Model):
         self.periodic_task.save(update_fields=update_fields)
         super().save(*args, **kwargs)
 
-    @classmethod
-    def align(cls, instance, **kwargs):
-        """Ensure PeriodicTask `instance` is aligned with its tenant.
 
-        If no PeriodicTaskTenantLink is attached, the headers dict determines how to
-        create the tenant link (if not present or missing the `_schema_name` key, use
-        `public`). Otherwise, the PeriodicTaskTenantLink is used to set the headers if
-        they are not already set.
-        """
-        if hasattr(instance, "periodic_task_tenant_link"):
-            # Ensure that the headers are present and aligned
-            headers = json.loads(instance.headers)
-            tenant_link = instance.periodic_task_tenant_link
-            if (
-                "_use_tenant_timezone" in headers
-                or headers.get("_schema_name") != tenant_link.tenant.schema_name
-            ):
-                instance.periodic_task_tenant_link.save()
-        else:
-            headers = json.loads(instance.headers)
-            schema_name = headers.get("_schema_name", get_public_schema_name())
-            use_tenant_timezone = headers.get("_use_tenant_timezone", False)
-            cls.objects.create(
-                periodic_task=instance,
-                # Assumes the public schema has been created already
-                # As long as no fiddling goes on, these tenants should always exist
-                tenant=get_tenant_model().objects.get(schema_name=schema_name),
-                use_tenant_timezone=use_tenant_timezone,
-            )
+def align(instance, **kwargs):
+    """Ensure PeriodicTask `instance` is aligned with its tenant.
+
+    If no PeriodicTaskTenantLink is attached, the headers dict determines how to
+    create the tenant link (if not present or missing the `_schema_name` key, use
+    `public`). Otherwise, the PeriodicTaskTenantLink is used to set the headers if
+    they are not already set.
+    """
+    if hasattr(instance, "periodic_task_tenant_link"):
+        # Ensure that the headers are present and aligned
+        headers = json.loads(instance.headers)
+        tenant_link = instance.periodic_task_tenant_link
+        if (
+            "_use_tenant_timezone" in headers
+            or headers.get("_schema_name") != tenant_link.tenant.schema_name
+        ):
+            instance.periodic_task_tenant_link.save()
+    else:
+        headers = json.loads(instance.headers)
+        schema_name = headers.get("_schema_name", get_public_schema_name())
+        use_tenant_timezone = headers.get("_use_tenant_timezone", False)
+        get_periodic_task_tenant_link_model().objects.create(
+            periodic_task=instance,
+            # Assumes the public schema has been created already
+            # As long as no fiddling goes on, these tenants should always exist
+            tenant=get_tenant_model().objects.get(schema_name=schema_name),
+            use_tenant_timezone=use_tenant_timezone,
+        )
 
 
-models.signals.post_save.connect(PeriodicTaskTenantLink.align, sender=PeriodicTask)
+models.signals.post_save.connect(align, sender=PeriodicTask)

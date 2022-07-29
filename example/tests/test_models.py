@@ -129,7 +129,7 @@ class PeriodicTaskTenantLink(TestCase):
             crontab=CrontabSchedule.objects.create(),
         )
         with patch(
-            "django_tenants_celery_beat.models.PeriodicTaskTenantLink.save"
+            "tenancy.models.PeriodicTaskTenantLink.save"
         ) as link_save:
             with self.subTest("No change"):
                 periodic_task.save()

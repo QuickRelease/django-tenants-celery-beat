@@ -56,11 +56,28 @@ You can configure whether the timezones are displayed with the GMT offset, i.e.
 (If you later change this setting, you will need to run `makemigrations` to see any effect.)
 
 Ensure that `DJANGO_CELERY_BEAT_TZ_AWARE` is True (the default) for any timezone aware
-scheduling to work. 
+scheduling to work.
+
+In order to make the link between your `Tenant` model and `PeriodicTask`, the app comes
+with an abstract model. You simply need create a class that inherits from this mixin and
+does nothing else. Having this model in your own first-party app means that the migrations
+can be managed properly.
+```python
+from django_tenants_celery_beat.models import PeriodicTaskTenantLinkMixin
+
+class PeriodicTaskTenantLink(PeriodicTaskTenantLinkMixin):
+    pass
+```
+You need to register which model is acting as the link. If your tenancy models live in
+an app called `tenancy` and the model is named as above, you need the following in your
+project settings:
+```python
+PERIODIC_TASK_TENANT_LINK_MODEL = "tenancy.PeriodicTaskTenantLink"
+```
 
 Once this has been done, you will need to run `makemigrations`. This will create the
-necessary migrations for your `Tenant` model but also for the models that come with this
-package. To apply the migrations, run:
+necessary migrations for your `Tenant` and `PeriodicTaskTenantLink` models.
+To apply the migrations, run:
 ```commandline
 python manage.py migrate_schemas --shared
 ```
