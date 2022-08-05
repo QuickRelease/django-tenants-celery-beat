@@ -1,0 +1,20 @@
+name: Autolabeler
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - main
+
+jobs:
+  update_labels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Autolabel PRs for Release Drafter categorisation
+      # `major` label must be manually added if major release required
+      - uses: release-drafter/release-drafter@v5
+        with:
+          disable-releaser: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
