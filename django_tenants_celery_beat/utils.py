@@ -1,8 +1,7 @@
 from copy import deepcopy
-import django
-django.setup()  # noqa
 
-from django_tenants.utils import get_tenant_model, get_public_schema_name
+from django_tenants.utils import get_tenant_model, get_public_schema_name, get_model
+from django.conf import settings
 
 
 def generate_beat_schedule(beat_schedule_config):
@@ -48,6 +47,9 @@ def generate_beat_schedule(beat_schedule_config):
     Returns:
         A valid beat_schedule (assign it to `app.conf.beat_schedule`).
     """
+    import django
+    django.setup()
+
     public_schema_name = get_public_schema_name()
     tenants = get_tenant_model().objects.exclude(schema_name=public_schema_name)
     beat_schedule = {}
@@ -78,3 +80,7 @@ def _set_schema_headers(config, schema_name, use_tenant_timezone=False):
     options["headers"] = headers
     config["options"] = options
     return config
+
+
+def get_periodic_task_tenant_link_model():
+    return get_model(settings.PERIODIC_TASK_TENANT_LINK_MODEL)

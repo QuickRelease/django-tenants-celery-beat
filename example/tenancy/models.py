@@ -1,7 +1,10 @@
 from django.db import models
 
 from django_tenants.models import DomainMixin, TenantMixin
-from django_tenants_celery_beat.models import TenantTimezoneMixin
+from django_tenants_celery_beat.models import (
+    TenantTimezoneMixin,
+    PeriodicTaskTenantLinkMixin,
+)
 
 
 class Tenant(TenantTimezoneMixin, TenantMixin):
@@ -16,4 +19,8 @@ class Tenant(TenantTimezoneMixin, TenantMixin):
 
 
 class Domain(DomainMixin):
+    pass
+
+
+class PeriodicTaskTenantLink(PeriodicTaskTenantLinkMixin):
     pass
