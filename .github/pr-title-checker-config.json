@@ -1,0 +1,15 @@
+{
+  "LABEL": {
+    "name": "invalid title",
+    "color": "B33A3A"
+  },
+  "CHECKS": {
+    "regexp": "^(docs|fix|feat|build|ci|chore|perf|refactor|revert|style|test)(\\([0-9a-zA-Z-_]+\\))?: .+$",
+    "ignoreLabels": ["skip-pr-title-check"]
+  },
+  "MESSAGES": {
+    "success": "Title OK",
+    "failure": "Failing Title Check Test",
+    "notice": ""
+  }
+}
