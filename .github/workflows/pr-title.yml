@@ -1,0 +1,15 @@
+name: PR Title Check
+
+on:
+  pull_request:
+    types: [opened, reopened, edited, labeled, unlabeled]
+
+jobs:
+  check-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR Title Format
+        uses: thehanimo/pr-title-checker@v1.3.4
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          configuration_path: ".github/pr-title-checker-config.json"
