@@ -1,22 +1,25 @@
 import json
 
-from django.db import models
-from django_celery_beat.models import PeriodicTask, CrontabSchedule
 import pytz
 import timezone_field
-
 from django.conf import settings
-from django_tenants.utils import get_tenant_model, get_public_schema_name
-from django_tenants_celery_beat.utils import get_periodic_task_tenant_link_model
+from django.db import models
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
+from django_tenants.utils import get_public_schema_name, get_tenant_model
+
+from django_tenants_celery_beat.utils import \
+    get_periodic_task_tenant_link_model
+
+timezone_field_kwargs = {
+    "default": "UTC",
+}
+
+if getattr(settings, "TENANT_TIMEZONE_DISPLAY_GMT_OFFSET", False):
+    timezone_field_kwargs["choices_display"] = "WITH_GMT_OFFSET"
 
 
 class TenantTimezoneMixin(models.Model):
-    timezone = timezone_field.TimeZoneField(
-        default="UTC",
-        display_GMT_offset=getattr(
-            settings, "TENANT_TIMEZONE_DISPLAY_GMT_OFFSET", False
-        ),
-    )
+    timezone = timezone_field.TimeZoneField(**timezone_field_kwargs)
 
     class Meta:
         abstract = True
@@ -53,9 +56,8 @@ class PeriodicTaskTenantLinkMixin(models.Model):
 
         headers = json.loads(self.periodic_task.headers)
         headers["_schema_name"] = self.tenant.schema_name
-        self.use_tenant_timezone = headers.pop(
-            "_use_tenant_timezone", self.use_tenant_timezone
-        )
+        self.use_tenant_timezone = headers.pop("_use_tenant_timezone",
+                                               self.use_tenant_timezone)
         self.periodic_task.headers = json.dumps(headers)
 
         if self.periodic_task.crontab is not None:
@@ -85,10 +87,8 @@ def align(instance, **kwargs):
         # Ensure that the headers are present and aligned
         headers = json.loads(instance.headers)
         tenant_link = instance.periodic_task_tenant_link
-        if (
-            "_use_tenant_timezone" in headers
-            or headers.get("_schema_name") != tenant_link.tenant.schema_name
-        ):
+        if ("_use_tenant_timezone" in headers or
+                headers.get("_schema_name") != tenant_link.tenant.schema_name):
             instance.periodic_task_tenant_link.save()
     else:
         headers = json.loads(instance.headers)
