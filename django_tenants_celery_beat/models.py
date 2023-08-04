@@ -10,14 +10,15 @@ from django_tenants.utils import get_tenant_model, get_public_schema_name
 from django_tenants_celery_beat.utils import get_periodic_task_tenant_link_model
 
 
-class TenantTimezoneMixin(models.Model):
-    timezone = timezone_field.TimeZoneField(
-        default="UTC",
-        display_GMT_offset=getattr(
-            settings, "TENANT_TIMEZONE_DISPLAY_GMT_OFFSET", False
-        ),
-    )
 
+timezone_field_kwargs = {
+    "default": "UTC",
+}
+if getattr(settings, "TENANT_TIMEZONE_DISPLAY_GMT_OFFSET", False):
+    timezone_field_kwargs["choices_display"] = "WITH_GMT_OFFSET"
+
+class TenantTimezoneMixin(models.Model):
+    timezone = timezone_field.TimeZoneField(**timezone_field_kwargs)
     class Meta:
         abstract = True
 
