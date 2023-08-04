@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="django-tenants-celery-beat",
-    version="0.2.0",
+    version="0.2.1",
     author="David Vaughan",
     author_email="david.vaughan@quickrelease.co.uk",
     maintainer="Quick Release (Automotive) Ltd.",
